@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080c10">
+  <title>Himachal Suraksha — Disaster Management System</title>
+  <link rel="stylesheet" href="css/main.css">
+  <style>
+    /* ── Landing hero ── */
+    .hero-section {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      background: var(--bg-primary);
+      background-image:
+        radial-gradient(ellipse at 10% 20%, rgba(255,23,68,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 80%, rgba(41,121,255,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(0,229,255,0.03) 0%, transparent 70%);
+    }
+    /* Grid scan lines */
+    .hero-section::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none;
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,229,255,0.015) 40px, rgba(0,229,255,0.015) 41px);
+      z-index: 0;
+    }
+    .hero-nav {
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      position: relative; z-index: 1;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8,12,16,0.8);
+      backdrop-filter: blur(8px);
+    }
+    .hero-nav .brand {
+      font-family: var(--font-display);
+      font-size: 1.1rem; font-weight: 700;
+      letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
+    }
+    .hero-nav .brand .shield {
+      width: 32px; height: 32px; background: var(--sos-red);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; box-shadow: 0 0 10px var(--sos-red-glow);
+    }
+    .hero-nav .brand span { color: var(--sos-red); }
+    .hero-nav .hp-text { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); margin-left: auto; letter-spacing: 1px; }
+
+    .hero-body {
+      flex: 1; display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 40px 24px; gap: 40px; position: relative; z-index: 1;
+      max-width: 1100px; margin: 0 auto; width: 100%;
+    }
+    @media (max-width: 768px) {
+      .hero-body { grid-template-columns: 1fr; padding: 24px 16px; gap: 28px; }
+      .hero-left { order: 2; text-align: center; }
+      .hero-right { order: 1; }
+    }
+
+    .hero-left .tagline {
+      font-family: var(--font-mono); font-size: 0.75rem;
+      color: var(--text-accent); letter-spacing: 3px;
+      text-transform: uppercase; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .hero-left .tagline::before { content: '//'; color: var(--sos-red); }
+    .hero-left h1 {
+      margin-bottom: 16px; line-height: 1.1;
+    }
+    .hero-left h1 em { color: var(--sos-red); font-style: normal; }
+    .hero-left .sub {
+      font-size: 1rem; color: var(--text-secondary);
+      line-height: 1.6; margin-bottom: 28px; max-width: 440px;
+    }
+    .hero-stats {
+      display: flex; gap: 24px; flex-wrap: wrap;
+    }
+    .hero-stat .val {
+      font-family: var(--font-display); font-size: 1.8rem; font-weight: 700;
+    }
+    .hero-stat:nth-child(1) .val { color: var(--sos-red); }
+    .hero-stat:nth-child(2) .val { color: var(--safe-green); }
+    .hero-stat:nth-child(3) .val { color: var(--info-blue); }
+    .hero-stat .stat-l { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 1px; font-family: var(--font-mono); }
+
+    /* Auth card right */
+    .auth-right { position: relative; }
+    .auth-right .auth-card { max-width: 420px; margin: 0 auto; }
+
+    /* Features strip */
+    .features-strip {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex; gap: 16px; overflow-x: auto;
+      position: relative; z-index: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+    .feature-chip {
+      display: flex; align-items: center; gap: 6px;
+      white-space: nowrap; font-size: 0.8rem;
+      color: var(--text-muted); flex-shrink: 0;
+    }
+    .feature-chip .fc-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--safe-green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <div class="loading-logo">HIMACHAL <span>SURAKSHA</span></div>
+    <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+    <div class="loading-text">INITIALIZING SYSTEM…</div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <!-- Nav -->
+    <nav class="hero-nav">
+      <div class="brand">
+        <div class="shield">🛡</div>
+        HIMACHAL <span>SURAKSHA</span>
+      </div>
+      <div class="hp-text">HP STATE DISASTER MANAGEMENT</div>
+    </nav>
+
+    <!-- Body -->
+    <div class="hero-body">
+      <!-- Left: Hero copy -->
+      <div class="hero-left">
+        <div class="tagline">State Emergency Response Platform</div>
+        <h1>Protecting <em>Lives</em><br>Across Himachal<br>Pradesh</h1>
+        <p class="sub">Real-time disaster monitoring, emergency SOS, volunteer coordination, and citizen safety management — all in one platform built for the mountains.</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="val">12</div><div class="stat-l">Districts</div></div>
+          <div class="hero-stat"><div class="val">24/7</div><div class="stat-l">Active</div></div>
+          <div class="hero-stat"><div class="val">SOS</div><div class="stat-l">Instant Alert</div></div>
+        </div>
+      </div>
+
+      <!-- Right: Auth -->
+      <div class="auth-right">
+        <div class="auth-card">
+          <!-- Logo -->
+          <div class="auth-logo">
+            <div class="logo-shield">🛡</div>
+            <h1>SURAKSHA</h1>
+            <p>Himachal Pradesh Disaster Management</p>
+          </div>
+
+          <!-- Login / Register Tabs -->
+          <div class="tab-group">
+            <button class="tab-btn active" data-tab="login">Sign In</button>
+            <button class="tab-btn" data-tab="register">Register</button>
+          </div>
+
+          <div class="auth-tabs">
+            <!-- LOGIN TAB -->
+            <div class="tab-content active" id="login-tab">
+              <form id="login-form">
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input type="email" id="login-email" class="form-control" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Password</label>
+                  <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="button" id="forgot-btn" class="btn btn-ghost btn-sm mb-12" style="margin-bottom:14px;">Forgot Password?</button>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">Sign In</button>
+              </form>
+              <div class="divider"></div>
+              <p style="font-size:0.78rem;color:var(--text-muted);text-align:center;">
+                Admin access? Use admin credentials provided by State HQ.
+              </p>
+            </div>
+
+            <!-- REGISTER TAB -->
+            <div class="tab-content" id="register-tab">
+              <!-- Role Selection -->
+              <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;">Select your role:</p>
+              <div class="role-select-grid">
+                <div class="role-opt selected" data-role="citizen">
+                  <div class="role-icon">👤</div>
+                  <div class="role-name">Citizen</div>
+                </div>
+                <div class="role-opt" data-role="volunteer">
+                  <div class="role-icon">🦺</div>
+                  <div class="role-name">Volunteer</div>
+                </div>
+                <div class="role-opt" data-role="info" style="opacity:0.5;pointer-events:none;">
+                  <div class="role-icon">🔒</div>
+                  <div class="role-name">Admin</div>
+                </div>
+              </div>
+
+              <form id="register-form">
+                <div class="form-group">
+                  <label class="form-label">Full Name *</label>
+                  <input type="text" id="reg-name" class="form-control" placeholder="Ramesh Kumar" required>
+                </div>
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Email *</label>
+                    <input type="email" id="reg-email" class="form-control" placeholder="email@domain.com" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Phone *</label>
+                    <input type="tel" id="reg-phone" class="form-control" placeholder="98XXXXXXXX" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">District *</label>
+                  <select id="reg-district" class="form-control" required>
+                    <option value="">Select District</option>
+                    <option>Bilaspur</option><option>Chamba</option><option>Hamirpur</option>
+                    <option>Kangra</option><option>Kinnaur</option><option>Kullu</option>
+                    <option>Lahaul &amp; Spiti</option><option>Mandi</option><option>Shimla</option>
+                    <option>Sirmaur</option><option>Solan</option><option>Una</option>
+                  </select>
+                </div>
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Password *</label>
+                    <input type="password" id="reg-password" class="form-control" placeholder="Min 6 chars" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Confirm *</label>
+                    <input type="password" id="reg-confirm" class="form-control" placeholder="Repeat" required>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                <p style="font-size:0.73rem;color:var(--text-muted);text-align:center;margin-top:10px;">
+                  Volunteer registrations require admin approval before login.
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features strip -->
+    <div class="features-strip">
+      <div class="feature-chip"><span class="fc-dot"></span> Live Alerts</div>
+      <div class="feature-chip"><span class="fc-dot"></span> SOS Emergency</div>
+      <div class="feature-chip"><span class="fc-dot"></span> GPS Tracking</div>
+      <div class="feature-chip"><span class="fc-dot"></span> Volunteer Network</div>
+      <div class="feature-chip"><span class="fc-dot"></span> Relief Camps</div>
+      <div class="feature-chip"><span class="fc-dot"></span> Safe Zones</div>
+      <div class="feature-chip"><span class="fc-dot"></span> Weather Forecast</div>
+      <div class="feature-chip"><span class="fc-dot"></span> Resource Management</div>
+      <div class="feature-chip"><span class="fc-dot"></span> Missing Persons</div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', initAuthPage);
+  </script>
+</body>
+</html>

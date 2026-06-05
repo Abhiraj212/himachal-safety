@@ -1,0 +1,41 @@
+// ============================================================
+// HIMACHAL SURAKSHA - Firebase Storage Rules
+// Paste into Firebase Console → Storage → Rules
+// ============================================================
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helper ──
+    function isSignedIn() { return request.auth != null; }
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*')
+          && request.resource.size < 5 * 1024 * 1024; // 5MB max
+    }
+
+    // ── Incident photos ──
+    match /incidents/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidImage();
+    }
+
+    // ── Missing person photos ──
+    match /missing_persons/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidImage();
+    }
+
+    // ── Blocked road photos ──
+    match /blocked_roads/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidImage();
+    }
+
+    // ── General uploads ──
+    match /uploads/{userId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId && isValidImage();
+    }
+  }
+}

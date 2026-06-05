@@ -1,0 +1,124 @@
+// ============================================================
+// HIMACHAL SURAKSHA - Firestore Security Rules
+// Paste into Firebase Console → Firestore → Rules
+// ============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function getUserRole() {
+      // Check all three collections for the user's role
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isVolunteer() {
+      return exists(/databases/$(database)/documents/volunteers/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/volunteers/$(request.auth.uid)).data.status == 'active';
+    }
+
+    // ── Users collection ──
+    match /users/{userId} {
+      allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── Volunteers collection ──
+    match /volunteers/{volId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isOwner(volId);
+      allow update: if isSignedIn() && (isOwner(volId) || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ── Admins collection ──
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ── SOS Requests ──
+    match /sos_requests/{docId} {
+      allow create: if isSignedIn(); // Any logged-in user can send SOS
+      allow read: if isSignedIn() && (
+        resource.data.uid == request.auth.uid || isAdmin() || isVolunteer()
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Incidents ──
+    match /incidents/{docId} {
+      allow create: if isSignedIn();
+      allow read: if isSignedIn();
+      allow update: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ── Missing Persons ──
+    match /missing_persons/{docId} {
+      allow create: if isSignedIn();
+      allow read: if isSignedIn(); // All logged-in users can view
+      allow update: if isAdmin() || isVolunteer();
+      allow delete: if isAdmin();
+    }
+
+    // ── Alerts (public read, admin/volunteer write) ──
+    match /alerts/{docId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── Relief Camps ──
+    match /relief_camps/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isVolunteer() || isAdmin();
+      allow update: if isAdmin() || (isVolunteer() && resource.data.uploadedByUID == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ── Safe Zones ──
+    match /safe_zones/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isVolunteer() || isAdmin();
+      allow update: if isAdmin() || (isVolunteer() && resource.data.uploadedByUID == request.auth.uid);
+      allow delete: if isAdmin() || (isVolunteer() && resource.data.uploadedByUID == request.auth.uid);
+    }
+
+    // ── Blocked Roads ──
+    match /blocked_roads/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isVolunteer() || isAdmin();
+      allow update: if isAdmin() || (isVolunteer() && resource.data.uploadedByUID == request.auth.uid);
+      allow delete: if isAdmin() || (isVolunteer() && resource.data.uploadedByUID == request.auth.uid);
+    }
+
+    // ── Resources (admin managed) ──
+    match /resources/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ── Public Updates ──
+    match /public_updates/{docId} {
+      allow read: if isSignedIn();
+      allow create: if isVolunteer() || isAdmin();
+      allow update: if isAdmin() || (isVolunteer() && resource.data.postedByUID == request.auth.uid);
+      allow delete: if isAdmin() || (isVolunteer() && resource.data.postedByUID == request.auth.uid);
+    }
+  }
+}
